@@ -1,5 +1,9 @@
 apply plugin: 'java'
 
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
 repositories {
     mavenCentral()
 }
@@ -8,5 +12,5 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.16.0'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.16.0'
-    implementation 'org.jetbrains:annotations:19.0.0'
+    implementation 'org.jetbrains:annotations:22.0.0'
 }

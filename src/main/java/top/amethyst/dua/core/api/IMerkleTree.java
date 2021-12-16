@@ -43,7 +43,7 @@ public interface IMerkleTree <T>
     boolean contains(@NotNull T value);
 
     /**
-     * 获取默克尔证据
+     * 生成数据的默克尔证据
      * <br>
      * 注意，调用本方法前需要先调用{@link #contains(T)}确定要验证的数据在默克尔树中
      * @param datum 要验证的数据

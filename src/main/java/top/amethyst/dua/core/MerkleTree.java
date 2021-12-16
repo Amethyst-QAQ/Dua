@@ -2,6 +2,7 @@ package top.amethyst.dua.core;
 
 import javafx.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import top.amethyst.dua.core.api.ICustomHashObject;
 import top.amethyst.dua.core.api.IHash;
 import top.amethyst.dua.core.api.IMerkleTree;
 import top.amethyst.dua.core.utils.MathUtil;
@@ -18,7 +19,7 @@ public class MerkleTree <T> implements IMerkleTree<T>
     private static class Node
     {
     }
-    private static class ParentNode extends Node
+    private static class ParentNode extends Node implements ICustomHashObject
     {
         public Hash childrenHash;
         public Node lChild;
@@ -28,7 +29,7 @@ public class MerkleTree <T> implements IMerkleTree<T>
         {
             Hash lHash = new Hash(lChild);
             Hash rHash = new Hash(null);
-            childrenHash = new Hash(lHash.toString() + rHash.toString());
+            childrenHash = new Hash(lHash.toString() + rHash);
             this.lChild = lChild;
             this.rChild = null;
         }
@@ -37,7 +38,7 @@ public class MerkleTree <T> implements IMerkleTree<T>
         {
             Hash lHash = new Hash(lChild);
             Hash rHash = new Hash(rChild);
-            childrenHash = new Hash(lHash.toString() + rHash.toString());
+            childrenHash = new Hash(lHash.toString() + rHash);
             this.lChild = lChild;
             this.rChild = rChild;
         }
@@ -56,9 +57,15 @@ public class MerkleTree <T> implements IMerkleTree<T>
         {
             return childrenHash.hashCode();
         }
+
+        @Override
+        public Object getHashPart()
+        {
+            return childrenHash;
+        }
     }
 
-    private static class LeaveNode <T> extends Node
+    private static class LeaveNode <T> extends Node implements ICustomHashObject
     {
         public Hash dataHash;
         public T data;
@@ -70,11 +77,12 @@ public class MerkleTree <T> implements IMerkleTree<T>
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public boolean equals(Object o)
         {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            LeaveNode leaveNode = (LeaveNode) o;
+            LeaveNode<T> leaveNode = (LeaveNode<T>) o;
             return dataHash.equals(leaveNode.dataHash);
         }
 
@@ -82,6 +90,12 @@ public class MerkleTree <T> implements IMerkleTree<T>
         public int hashCode()
         {
             return dataHash.hashCode();
+        }
+
+        @Override
+        public Object getHashPart()
+        {
+            return dataHash;
         }
     }
 
@@ -128,6 +142,7 @@ public class MerkleTree <T> implements IMerkleTree<T>
          * 获得默克尔证据对应的数据
          */
         @NotNull
+        @Override
         public T getDatum()
         {
             return datum;
@@ -138,15 +153,16 @@ public class MerkleTree <T> implements IMerkleTree<T>
          * @param rootHash 对应的默克尔树根节点哈希值
          * @return 如果默克尔证据有效，返回true
          */
+        @Override
         public boolean valid(@NotNull IHash rootHash)
         {
-            Hash hash = new Hash(datum);
+            Hash hash = new Hash(new Hash(datum));
             for(Pair<Boolean, Hash> i : data)
             {
                 if(i.getKey())
-                    hash = new Hash(i.getValue().toString() + hash);
+                    hash = new Hash(new Hash(i.getValue().toString() + hash));
                 else
-                    hash = new Hash(hash + i.getValue().toString());
+                    hash = new Hash(new Hash(hash + i.getValue().toString()));
             }
 
             return hash.equals(rootHash);
@@ -158,13 +174,13 @@ public class MerkleTree <T> implements IMerkleTree<T>
     private int height;
 
     private int lastIndex;
-    private ArrayList<Pair<Boolean, Node>> lastSearch;
+    private final ArrayList<Pair<Boolean, Node>> lastSearch;
 
     private @NotNull ArrayList<Node> generateNodes(@NotNull ArrayList<Node> from)
     {
         height++;
         ArrayList<Node> out = new ArrayList<>();
-        for(int i = 0; i < from.size(); i += 2)
+        for(int i = 0; i < from.size() - 1; i += 2)
             out.add(new ParentNode(from.get(i), from.get(i + 1)));
 
         if(from.size() % 2 == 1)
@@ -173,6 +189,7 @@ public class MerkleTree <T> implements IMerkleTree<T>
         return out;
     }
 
+    @SuppressWarnings("unchecked")
     private boolean searchFrom(@NotNull Node node, int currentNodeIndex, int currentHeight)
     {
         if(node instanceof LeaveNode)
@@ -246,6 +263,7 @@ public class MerkleTree <T> implements IMerkleTree<T>
      * 获得根节点的哈希值
      */
     @NotNull
+    @Override
     public IHash getRootHash()
     {
         return new Hash(root);
@@ -256,6 +274,7 @@ public class MerkleTree <T> implements IMerkleTree<T>
      * @param value 要判断的数据
      * @return 如果数据在默克尔树中，返回true，否则返回false
      */
+    @Override
     public boolean contains(@NotNull T value)
     {
         return leaves.containsKey(new LeaveNode<>(value));
@@ -270,6 +289,7 @@ public class MerkleTree <T> implements IMerkleTree<T>
      *
      */
     @NotNull
+    @Override
     public IMerkleTree.IMerkleProof<T> getMerkleProof(@NotNull T datum)
     {
         if(!contains(datum))
