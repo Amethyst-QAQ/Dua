@@ -1,5 +1,7 @@
 package top.amethyst.dua.core;
 
-public class Transaction
+import top.amethyst.dua.core.api.ITransaction;
+
+public class Transaction implements ITransaction
 {
 }

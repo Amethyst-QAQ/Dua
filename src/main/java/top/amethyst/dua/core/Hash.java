@@ -1,6 +1,7 @@
 package top.amethyst.dua.core;
 
 import org.jetbrains.annotations.NotNull;
+import top.amethyst.dua.core.api.ICustomHashObject;
 import top.amethyst.dua.core.api.IHash;
 import top.amethyst.dua.core.utils.GsonImpl;
 
@@ -49,6 +50,8 @@ public class Hash implements IHash
      */
     public Hash(Object obj)
     {
+        if(obj instanceof ICustomHashObject)
+            obj = ((ICustomHashObject) obj).getHashPart();
         String json = GsonImpl.GSON.toJson(obj);
         value = SHA256(json);
     }

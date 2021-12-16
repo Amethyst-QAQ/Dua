@@ -13,7 +13,7 @@ public interface IMerkleTree <T>
      * <br>
      * 默克尔证据由默克尔树产生，用来判断指定数据在默克尔树中的合法性
      */
-    public interface IMerkleProof <T>
+    interface IMerkleProof <T>
     {
         /**
          * 获得默克尔证据对应的数据
