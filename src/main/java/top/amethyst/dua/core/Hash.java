@@ -1,11 +1,16 @@
 package top.amethyst.dua.core;
 
+import org.jetbrains.annotations.NotNull;
+import top.amethyst.dua.core.api.IHash;
 import top.amethyst.dua.core.utils.GsonImpl;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
-public class Hash
+/**
+ * 对{@link IHash}接口的实现
+ */
+public class Hash implements IHash
 {
     private final String value;
 
@@ -38,19 +43,14 @@ public class Hash
         return encodeStr;
     }
 
+    /**
+     * 创建指定对象的哈希值
+     * @param obj 指定的对象
+     */
     public Hash(Object obj)
     {
         String json = GsonImpl.GSON.toJson(obj);
         value = SHA256(json);
-    }
-
-    public Hash(Object... objects)
-    {
-        StringBuilder json = new StringBuilder();
-        for(Object i : objects)
-            json.append(GsonImpl.GSON.toJson(i));
-
-        value = SHA256(json.toString());
     }
 
     @Override
@@ -60,10 +60,23 @@ public class Hash
     }
 
     @Override
-    public boolean equals(Object obj)
+    public int compareTo(@NotNull IHash o)
     {
-        if(obj instanceof Hash)
-            return value.equals(((Hash) obj).value);
-        return false;
+        return value.compareTo(o.toString());
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Hash hash = (Hash) o;
+        return value.equals(hash.value);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return value.hashCode();
     }
 }
