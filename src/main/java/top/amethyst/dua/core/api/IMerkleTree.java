@@ -6,14 +6,14 @@ import org.jetbrains.annotations.NotNull;
  * 默克尔树，用于存储交易信息
  * @param <T> 默克尔树存储的数据类型
  */
-public interface IMerkleTree <T>
+public interface IMerkleTree <T extends IJsonSerializable> extends IJsonSerializable
 {
     /**
      * 默克尔证据
      * <br>
      * 默克尔证据由默克尔树产生，用来判断指定数据在默克尔树中的合法性
      */
-    interface IMerkleProof <T>
+    interface IMerkleProof <T extends IJsonSerializable> extends IJsonSerializable
     {
         /**
          * 获得默克尔证据对应的数据

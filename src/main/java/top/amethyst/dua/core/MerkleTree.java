@@ -1,117 +1,139 @@
 package top.amethyst.dua.core;
 
-import javafx.util.Pair;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
-import top.amethyst.dua.core.api.ICustomHashObject;
+import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.core.api.IHash;
+import top.amethyst.dua.core.api.IJsonSerializable;
 import top.amethyst.dua.core.api.IMerkleTree;
+import top.amethyst.dua.core.utils.AlgorithmUtil;
+import top.amethyst.dua.core.utils.JsonUtil;
 import top.amethyst.dua.core.utils.MathUtil;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * 对{@link IMerkleTree}接口的实现
  */
-public class MerkleTree <T> implements IMerkleTree<T>
+public abstract class MerkleTree <T extends IJsonSerializable> implements IMerkleTree<T>
 {
-    private static class Node
+    private abstract static class Node implements IJsonSerializable
     {
-    }
-    private static class ParentNode extends Node implements ICustomHashObject
-    {
-        public Hash childrenHash;
-        public Node lChild;
-        public Node rChild;
+        @NotNull
+        public abstract Hash getChildrenHash();
 
-        public ParentNode(@NotNull Node lChild)
+        @Nullable
+        public abstract Node getLChild();
+
+        @Nullable
+        public abstract Node getRChild();
+    }
+
+    private static class ParentNode extends Node
+    {
+        private final Hash childrenHash;
+        private final Node lChild;
+        private final Node rChild;
+        public ParentNode(Node lChild)
         {
-            Hash lHash = new Hash(lChild);
-            Hash rHash = new Hash(null);
-            childrenHash = new Hash(lHash.toString() + rHash);
             this.lChild = lChild;
             this.rChild = null;
+            this.childrenHash = new Hash(lChild, null);
         }
-
-        public ParentNode(@NotNull Node lChild, @NotNull Node rChild)
+        public ParentNode(Node lChild, Node rChild)
         {
-            Hash lHash = new Hash(lChild);
-            Hash rHash = new Hash(rChild);
-            childrenHash = new Hash(lHash.toString() + rHash);
             this.lChild = lChild;
             this.rChild = rChild;
+            this.childrenHash = new Hash(lChild, rChild);
         }
-
-        @Override
-        public boolean equals(Object o)
+        public ParentNode(JsonObject json)
         {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ParentNode that = (ParentNode) o;
-            return childrenHash.equals(that.childrenHash);
+            lChild = null;
+            rChild = null;
+            childrenHash = new Hash(json.getAsJsonObject("childrenHash"));
         }
-
         @Override
-        public int hashCode()
-        {
-            return childrenHash.hashCode();
-        }
-
-        @Override
-        public Object getHashPart()
+        public @NotNull Hash getChildrenHash()
         {
             return childrenHash;
         }
-    }
 
-    private static class LeaveNode <T> extends Node implements ICustomHashObject
-    {
-        public Hash dataHash;
-        public T data;
-
-        public LeaveNode(@NotNull T data)
+        @Override
+        public @Nullable Node getLChild()
         {
-            dataHash = new Hash(data);
-            this.data = data;
+            return lChild;
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        public boolean equals(Object o)
+        public @Nullable Node getRChild()
         {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            LeaveNode<T> leaveNode = (LeaveNode<T>) o;
-            return dataHash.equals(leaveNode.dataHash);
+            return rChild;
         }
 
         @Override
-        public int hashCode()
+        public @NotNull JsonObject serialize()
         {
-            return dataHash.hashCode();
-        }
-
-        @Override
-        public Object getHashPart()
-        {
-            return dataHash;
+            JsonObject json = new JsonObject();
+            json.add("childrenHash", childrenHash.serialize());
+            return json;
         }
     }
 
-    private static class MerkleProofNodes
+    private class LeaveNode extends Node implements Comparable<LeaveNode>
     {
-        private final ArrayList<Pair<Boolean, Node>> data;
+        private final T datum;
+        private final Hash datumHash;
 
-        public MerkleProofNodes(@NotNull ArrayList<Pair<Boolean, Node>> data)
+        public LeaveNode(@NotNull T datum)
         {
-            this.data = data;
+            this.datum = datum;
+            this.datumHash = new Hash(datum);
         }
 
-        @NotNull
-        public ArrayList<Pair<Boolean, Node>> getData()
+        public LeaveNode(@NotNull JsonObject json)
         {
-            return data;
+            this.datum = JsonUtil.deserialize(json.getAsJsonObject("datum"), classOfT);
+            this.datumHash = new Hash(json.getAsJsonObject("datumHash"));
+            if(!this.datumHash.equals(new Hash(this.datum)))
+                throw new RuntimeException("Illegal leave node received!");
+        }
+
+        @Override
+        public @NotNull Hash getChildrenHash()
+        {
+            return datumHash;
+        }
+
+        @Override
+        public @Nullable Node getLChild()
+        {
+            return null;
+        }
+
+        @Override
+        public @Nullable Node getRChild()
+        {
+            return null;
+        }
+
+        @Override
+        public @NotNull JsonObject serialize()
+        {
+            JsonObject json = new JsonObject();
+            json.add("datum", datum.serialize());
+            json.add("datumHash", datumHash.serialize());
+            return json;
+        }
+
+        @Override
+        public int compareTo(@NotNull MerkleTree<T>.LeaveNode o)
+        {
+            return datumHash.compareTo(o.datumHash);
         }
     }
 
@@ -121,182 +143,222 @@ public class MerkleTree <T> implements IMerkleTree<T>
     public class MerkleProof implements IMerkleTree.IMerkleProof<T>
     {
         private final T datum;
-        private final ArrayList<Pair<Boolean, Hash>> data;
+        private final ArrayList<Boolean> isLeft;
+        private final ArrayList<Node> nodes;
 
         /**
-         * 构造函数
-         * 该构造函数无法使用，要创建默克尔证据，使用{@link MerkleTree#getMerkleProof(T)}
+         * 此构造函数无法使用
+         * <br>
+         * 要创建默克尔证据，使用{@link IMerkleTree#getMerkleProof(T)}
          */
-        public MerkleProof(@NotNull T datum, @NotNull MerkleProofNodes from)
+        public MerkleProof(T datum, ArrayList<Boolean> isLeft, ArrayList<Node> nodes)
         {
             this.datum = datum;
-            data = new ArrayList<>();
-            ArrayList<Pair<Boolean, Node>> fromData = from.getData();
-            for(Pair<Boolean, Node> i : fromData)
-            {
-                data.add(new Pair<>(i.getKey(), new Hash(i.getValue())));
-            }
+            this.isLeft = isLeft;
+            this.nodes = nodes;
         }
 
         /**
-         * 获得默克尔证据对应的数据
+         * 从Json反序列化
          */
-        @NotNull
+        public MerkleProof(JsonObject json)
+        {
+            datum = JsonUtil.deserialize(json.getAsJsonObject("datum"), classOfT);
+            isLeft = new ArrayList<>();
+            nodes = new ArrayList<>();
+            JsonArray isLeftJson = json.getAsJsonArray("isLeft");
+            JsonArray nodesJson = json.getAsJsonArray("nodes");
+            for(JsonElement i : isLeftJson)
+                isLeft.add(i.getAsBoolean());
+            for(JsonElement i : nodesJson)
+            {
+                JsonObject temp = i.getAsJsonObject().getAsJsonObject("value");
+                if(i.getAsJsonObject().get("isLeave").getAsBoolean())
+                    nodes.add(new LeaveNode(temp));
+                else
+                    nodes.add(new ParentNode(temp));
+            }
+        }
+
         @Override
-        public T getDatum()
+        public @NotNull T getDatum()
         {
             return datum;
         }
 
-        /**
-         * 验证默克尔证据的有效性
-         * @param rootHash 对应的默克尔树根节点哈希值
-         * @return 如果默克尔证据有效，返回true
-         */
         @Override
         public boolean valid(@NotNull IHash rootHash)
         {
-            Hash hash = new Hash(new Hash(datum));
-            for(Pair<Boolean, Hash> i : data)
+            Node start = new LeaveNode(datum);
+            for(int i = 0; i < isLeft.size(); i++)
             {
-                if(i.getKey())
-                    hash = new Hash(new Hash(i.getValue().toString() + hash));
+                if(isLeft.get(i))
+                    start = new ParentNode(nodes.get(i), start);
                 else
-                    hash = new Hash(new Hash(hash + i.getValue().toString()));
+                    start = new ParentNode(start, nodes.get(i));
             }
+            return new Hash(start).equals(rootHash);
+        }
 
-            return hash.equals(rootHash);
+        @Override
+        public @NotNull JsonObject serialize()
+        {
+            JsonObject json = new JsonObject();
+            JsonArray nodesJson = new JsonArray();
+            JsonArray isLeftJson = new JsonArray();
+            for(Node i : nodes)
+            {
+                JsonObject temp = new JsonObject();
+                temp.add("value", i.serialize());
+                temp.addProperty("isLeave", !(i instanceof ParentNode));
+                nodesJson.add(temp);
+            }
+            for(Boolean i : isLeft)
+                isLeftJson.add(i);
+            json.add("nodes", nodesJson);
+            json.add("isLeft", isLeftJson);
+            json.add("datum", datum.serialize());
+            return json;
         }
     }
 
-    private final Node root;
-    private final HashMap<LeaveNode<T>, Integer> leaves;
+    private final Class<T> classOfT;
+    private final ParentNode root;
+    private final ArrayList<LeaveNode> leaves;
     private int height;
 
-    private int lastIndex;
-    private final ArrayList<Pair<Boolean, Node>> lastSearch;
-
-    private @NotNull ArrayList<Node> generateNodes(@NotNull ArrayList<Node> from)
+    @SuppressWarnings("unchecked")
+    private Class<T> getTClass()
     {
-        height++;
-        ArrayList<Node> out = new ArrayList<>();
-        for(int i = 0; i < from.size() - 1; i += 2)
-            out.add(new ParentNode(from.get(i), from.get(i + 1)));
-
-        if(from.size() % 2 == 1)
-            out.add(new ParentNode(from.get(from.size() - 1)));
-
+        Class<T> out;
+        Type temp = getClass().getGenericSuperclass();
+        if(!(temp instanceof ParameterizedType))
+            throw new RuntimeException("What Happened?");
+        else
+        {
+            Type[] types = ((ParameterizedType) temp).getActualTypeArguments();
+            if(types == null)
+                throw new RuntimeException("What Happened??");
+            else if(types.length == 0)
+                throw new RuntimeException("What Happened???");
+            else
+                out = (Class<T>) types[0];
+        }
         return out;
     }
 
-    @SuppressWarnings("unchecked")
-    private boolean searchFrom(@NotNull Node node, int currentNodeIndex, int currentHeight)
-    {
-        if(node instanceof LeaveNode)
-        {
-            return leaves.get((LeaveNode<T>) node) == lastIndex;
-        }
-
-        ParentNode node1 = (ParentNode) node;
-
-        int layerWidth = MathUtil.pow(2, currentHeight);
-        boolean found;
-
-        if(lastIndex >= currentNodeIndex + layerWidth)
-            found = searchFrom(node1.rChild, currentNodeIndex + layerWidth, currentHeight - 1);
-        else
-            found = searchFrom(node1.lChild, currentNodeIndex, currentHeight - 1);
-
-        if(found)
-        {
-            if(lastIndex >= currentNodeIndex + layerWidth)
-                lastSearch.add(new Pair<>(true, node1.lChild));
-            else
-                lastSearch.add(new Pair<>(false, node1.rChild));
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private void searchFor(int index)
-    {
-        if(index == lastIndex)
-            return;
-        lastSearch.clear();
-        lastIndex = index;
-        searchFrom(root, 0, height - 1);
-    }
-
-    /**
-     * 构造函数
-     * @param data 要构建为默克尔树的数据
-     */
-    public MerkleTree(@NotNull List<T> data)
-    {
-        if(data.size() == 0)
-            throw new IllegalArgumentException("Cannot build Merkle tree with 0 datum");
-
-        ArrayList<Node> nodes = new ArrayList<>();
-
-        leaves = new HashMap<>();
-
-        for (int i = 0; i < data.size(); i++)
-        {
-            LeaveNode<T> newNode = new LeaveNode<>(data.get(i));
-            nodes.add(newNode);
-            leaves.put(newNode, i);
-        }
-
-        height = 0;
-
-        while (nodes.size() > 1)
-            nodes = generateNodes(nodes);
-
-        root = nodes.get(0);
-        lastSearch = new ArrayList<>();
-        lastIndex = 0;
-    }
-
-    /**
-     * 获得根节点的哈希值
-     */
     @NotNull
+    private ArrayList<Node> createNodes(@NotNull ArrayList<? extends Node> nodes)
+    {
+        ArrayList<Node> out = new ArrayList<>();
+        for(int i = 0; i < nodes.size() - 1; i += 2)
+        {
+            ParentNode temp = new ParentNode(nodes.get(i), nodes.get(i + 1));
+            out.add(temp);
+        }
+        if(nodes.size() % 2 == 1)
+            out.add(new ParentNode(nodes.get(nodes.size() - 1)));
+
+        height++;
+        return out;
+    }
+
+    private void searchFrom(int targetIndex, Node node, int currentHeight, int currentIndex, ArrayList<Node> result, ArrayList<Boolean> isLeft)
+    {
+        if(node instanceof ParentNode)
+        {
+            if (targetIndex < currentIndex + MathUtil.pow(2, currentHeight))
+            {
+                searchFrom(targetIndex, node.getLChild(), currentHeight - 1, currentIndex, result, isLeft);
+                result.add(node.getRChild());
+                isLeft.add(false);
+            }
+            else
+            {
+                searchFrom(targetIndex, node.getRChild(), currentHeight - 1, currentIndex + MathUtil.pow(2, currentHeight), result, isLeft);
+                result.add(node.getLChild());
+                isLeft.add(true);
+            }
+        }
+    }
+
+    /**
+     * 从指定数据创建默克尔树
+     */
+    public MerkleTree(Collection<? extends T> data)
+    {
+        height = 0;
+        classOfT = getTClass();
+        leaves = new ArrayList<>();
+        for(T i : data)
+            leaves.add(new LeaveNode(i));
+
+        leaves.sort(LeaveNode::compareTo);
+
+        ArrayList<? extends Node> nodes = leaves;
+        while (nodes.size() > 1)
+            nodes = createNodes(nodes);
+        root = (ParentNode) nodes.get(0);
+    }
+
+    /**
+     * 从Json反序列化
+     */
+    public MerkleTree(JsonObject json)
+    {
+        height = 0;
+        classOfT = getTClass();
+
+        leaves = new ArrayList<>();
+        JsonArray array = json.getAsJsonArray("leaves");
+        for(JsonElement i : array)
+        {
+            leaves.add(new LeaveNode(i.getAsJsonObject()));
+        }
+
+        ArrayList<? extends Node> nodes = leaves;
+        while (nodes.size() > 1)
+            nodes = createNodes(nodes);
+        root = (ParentNode) nodes.get(0);
+    }
+
     @Override
-    public IHash getRootHash()
+    public @NotNull JsonObject serialize()
+    {
+        JsonObject json = new JsonObject();
+        JsonArray array = new JsonArray();
+        for(LeaveNode i : leaves)
+            array.add(i.serialize());
+
+        json.add("leaves", array);
+
+        return json;
+    }
+
+    @Override
+    public @NotNull IHash getRootHash()
     {
         return new Hash(root);
     }
 
-    /**
-     * 判断指定数据是否在默克尔树中
-     * @param value 要判断的数据
-     * @return 如果数据在默克尔树中，返回true，否则返回false
-     */
     @Override
     public boolean contains(@NotNull T value)
     {
-        return leaves.containsKey(new LeaveNode<>(value));
+        return AlgorithmUtil.binarySearch(leaves, new LeaveNode(value)) >= 0;
     }
 
-    /**
-     * 获取默克尔证据
-     * <br>
-     * 注意，调用本方法前需要先调用{@link #contains(T)}确定要验证的数据在默克尔树中
-     * @param datum 要验证的数据
-     * @return 用于验证数据的默克尔证据
-     *
-     */
-    @NotNull
     @Override
-    public IMerkleTree.IMerkleProof<T> getMerkleProof(@NotNull T datum)
+    public @NotNull IMerkleProof<T> getMerkleProof(@NotNull T datum)
     {
-        if(!contains(datum))
-            throw new IllegalArgumentException("Merkle tree does not contain this datum");
+        int index = AlgorithmUtil.binarySearch(leaves, new LeaveNode(datum));
+        if(index < 0)
+            throw new IllegalArgumentException("Cannot get Merkle proof of a nonexistent datum!");
 
-        searchFor(leaves.get(new LeaveNode<>(datum)));
+        ArrayList<Node> nodes = new ArrayList<>();
+        ArrayList<Boolean> isLeft = new ArrayList<>();
 
-        return new MerkleProof(datum, new MerkleProofNodes(lastSearch));
+        searchFrom(index, root, height - 1, 0, nodes, isLeft);
+
+        return new MerkleProof(datum, isLeft, nodes);
     }
 }

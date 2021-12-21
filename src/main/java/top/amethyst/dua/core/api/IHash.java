@@ -5,7 +5,7 @@ package top.amethyst.dua.core.api;
  * <br>
  * 哈希值提供转化为字符串，判断相等，比较以及转化为32位哈希值的方法
  */
-public interface IHash extends Comparable<IHash>
+public interface IHash extends Comparable<IHash>, IJsonSerializable
 {
     /**
      * 转化为字符串

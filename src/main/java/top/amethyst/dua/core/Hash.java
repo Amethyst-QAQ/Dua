@@ -1,9 +1,9 @@
 package top.amethyst.dua.core;
 
+import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
-import top.amethyst.dua.core.api.ICustomHashObject;
 import top.amethyst.dua.core.api.IHash;
-import top.amethyst.dua.core.utils.GsonImpl;
+import top.amethyst.dua.core.api.IJsonSerializable;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -46,14 +46,35 @@ public class Hash implements IHash
 
     /**
      * 创建指定对象的哈希值
-     * @param obj 指定的对象
+     * @param objects 指定的对象，可以为null
      */
-    public Hash(Object obj)
+    public Hash(IJsonSerializable... objects)
     {
-        if(obj instanceof ICustomHashObject)
-            obj = ((ICustomHashObject) obj).getHashPart();
-        String json = GsonImpl.GSON.toJson(obj);
-        value = SHA256(json);
+        StringBuilder builder = new StringBuilder();
+        for(IJsonSerializable i : objects)
+        {
+            if (i == null)
+                builder.append("{}");
+            else
+                builder.append(i.serialize());
+        }
+        value = SHA256(builder.toString());
+    }
+
+    /**
+     * 从Json反序列化
+     */
+    public Hash(JsonObject json)
+    {
+        value = json.get("value").getAsString();
+    }
+
+    /**
+     * 创建空对象的哈希值
+     */
+    public Hash()
+    {
+        value = SHA256("{}");
     }
 
     @Override
@@ -81,5 +102,13 @@ public class Hash implements IHash
     public int hashCode()
     {
         return value.hashCode();
+    }
+
+    @Override
+    public @NotNull JsonObject serialize()
+    {
+        JsonObject json = new JsonObject();
+        json.addProperty("value", value);
+        return json;
     }
 }

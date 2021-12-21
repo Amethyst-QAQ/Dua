@@ -1,5 +1,6 @@
 package top.amethyst.dua.core.api;
 
+import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,14 +9,14 @@ import org.jetbrains.annotations.Nullable;
  * <br>
  * 区块由块头和块身组成，每个区块必须存储块头，但可以不存储块身，区块计算哈希值时，仅计算块头哈希值
  */
-public interface IBlock extends ICustomHashObject
+public interface IBlock extends IJsonSerializable
 {
     /**
      * 块头
      * <br>
      * 块头由序号，上一区块哈希值，时间戳，工作量证明和块身默克尔树根节点的哈希值组成
      */
-    interface IHead
+    interface IHead extends IJsonSerializable
     {
         /**
          * 生成一个工作量证明递增的块头
@@ -57,7 +58,7 @@ public interface IBlock extends ICustomHashObject
      * <br>
      * 块身中以默克尔树的形式存储交易列表
      */
-    interface IBody
+    interface IBody extends IJsonSerializable
     {
         /**
          * 获取交易列表默克尔树
@@ -91,9 +92,11 @@ public interface IBlock extends ICustomHashObject
      */
     void setBody(@Nullable IBlock.IBody body);
 
+
     @Override
-    default Object getHashPart()
+    @NotNull
+    default JsonObject serialize()
     {
-        return getHead();
+        return getHead().serialize();
     }
 }

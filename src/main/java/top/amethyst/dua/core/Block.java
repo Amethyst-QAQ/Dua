@@ -1,8 +1,10 @@
 package top.amethyst.dua.core;
 
+import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.core.api.*;
+import top.amethyst.dua.core.utils.JsonUtil;
 
 /**
  * 对{@link IBlock}接口的实现
@@ -28,6 +30,18 @@ public class Block implements IBlock
             this.timestamp = timestamp;
             this.nonce = nonce;
             this.rootHash = rootHash;
+        }
+
+        /**
+         * 从Json反序列化
+         */
+        public Head(JsonObject json)
+        {
+            index = json.get("index").getAsInt();
+            prevHash = new Hash(json.get("prevHash").getAsJsonObject());
+            timestamp = json.get("timestamp").getAsLong();
+            nonce = json.get("nonce").getAsInt();
+            rootHash = new Hash(json.get("rootHash").getAsJsonObject());
         }
 
         @NotNull
@@ -68,6 +82,18 @@ public class Block implements IBlock
         {
             return rootHash;
         }
+
+        @Override
+        public @NotNull JsonObject serialize()
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("index", index);
+            json.add("prevHash", prevHash.serialize());
+            json.addProperty("timestamp", timestamp);
+            json.addProperty("nonce", nonce);
+            json.add("rootHash", rootHash.serialize());
+            return json;
+        }
     }
 
     /**
@@ -82,11 +108,35 @@ public class Block implements IBlock
             this.transactions = transactions;
         }
 
+        /**
+         * 从Json反序列化
+         */
+        public Body(JsonObject json)
+        {
+            class Temp extends MerkleTree<ITransaction>
+            {
+                public Temp(JsonObject json)
+                {
+                    super(json);
+                }
+            }
+
+            transactions = JsonUtil.deserialize(json.getAsJsonObject("transactions"), Temp.class);
+        }
+
         @NotNull
         @Override
         public IMerkleTree<ITransaction> getTransactions()
         {
             return transactions;
+        }
+
+        @Override
+        public @NotNull JsonObject serialize()
+        {
+            JsonObject json = new JsonObject();
+            json.add("transactions", transactions.serialize());
+            return json;
         }
     }
 
@@ -97,6 +147,15 @@ public class Block implements IBlock
     {
         this.head = head;
         this.body = body;
+    }
+
+    /**
+     * 从Json反序列化
+     */
+    public Block(@NotNull JsonObject json)
+    {
+        head = JsonUtil.deserialize(json, Head.class);
+        body = null;
     }
 
     @NotNull

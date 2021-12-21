@@ -1,7 +1,9 @@
 package top.amethyst.dua.core;
 
+import com.google.gson.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import top.amethyst.dua.core.api.IMerkleTree;
 import top.amethyst.dua.core.utils.Log4jInitializer;
 
@@ -18,15 +20,26 @@ public class Main
 
     public static void main(String[] args)
     {
-        ArrayList<Integer> list = new ArrayList<>();
-        for(int i = 0; i < 10; i++)
-            list.add(i);
+        try
+        {
+            ArrayList<Block> test = new ArrayList<>();
+            for (int i = 0; i < 10; i++)
+                test.add(new Block(new Block.Head(0, new Hash(), 0, i, new Hash()), null));
 
-        IMerkleTree<Integer> test = new MerkleTree<>(list);
+            MerkleTree<Block> testTree = new MerkleTree<Block>(test){};
 
-        IMerkleTree.IMerkleProof<Integer> proof = test.getMerkleProof(5);
+            if(testTree.contains(test.get(3)))
+            {
+                IMerkleTree.@NotNull IMerkleProof<Block> proof = testTree.getMerkleProof(test.get(3));
+                LOGGER.debug(proof.valid(testTree.getRootHash()));
+            }
 
-        LOGGER.debug(proof.getDatum());
-        LOGGER.debug(proof.valid(test.getRootHash()));
+            JsonObject testJson = testTree.serialize();
+            LOGGER.debug(testJson);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }
