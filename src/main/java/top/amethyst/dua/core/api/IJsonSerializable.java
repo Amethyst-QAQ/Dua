@@ -2,6 +2,9 @@ package top.amethyst.dua.core.api;
 
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 /**
  * 可被自定义Json序列化的对象
@@ -11,6 +14,21 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface IJsonSerializable
 {
+    /**
+     * 序列化
+     * <br>
+     * 在此函数中创建Json对象并把属性写入其中，以完成序列化
+     */
     @NotNull
     JsonObject serialize();
+
+    /**
+     * 设置不被包含在哈希计算中的成员
+     * @return 包含这些成员名的数组
+     */
+    @Nullable
+    default ArrayList<String> getHashExcludedFields()
+    {
+        return null;
+    }
 }

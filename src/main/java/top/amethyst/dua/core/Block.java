@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.core.api.*;
 import top.amethyst.dua.core.utils.JsonUtil;
 
+import java.util.ArrayList;
+
 /**
  * 对{@link IBlock}接口的实现
  */
@@ -154,8 +156,29 @@ public class Block implements IBlock
      */
     public Block(@NotNull JsonObject json)
     {
-        head = JsonUtil.deserialize(json, Head.class);
-        body = null;
+        head = JsonUtil.deserialize(json.getAsJsonObject("head"), Head.class);
+        if(json.has("body"))
+            body = JsonUtil.deserialize(json.getAsJsonObject("body"), Body.class);
+        else
+            body = null;
+    }
+
+    @Override
+    public @NotNull JsonObject serialize()
+    {
+        JsonObject json = new JsonObject();
+        json.add("head", head.serialize());
+        if(body != null)
+            json.add("body", body.serialize());
+        return json;
+    }
+
+    @Override
+    public @Nullable ArrayList<String> getHashExcludedFields()
+    {
+        ArrayList<String> list = new ArrayList<>();
+        list.add("body");
+        return list;
     }
 
     @NotNull

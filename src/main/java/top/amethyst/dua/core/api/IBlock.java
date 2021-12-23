@@ -91,12 +91,4 @@ public interface IBlock extends IJsonSerializable
      * @param body 新的块身，只接受有效的块身或null
      */
     void setBody(@Nullable IBlock.IBody body);
-
-
-    @Override
-    @NotNull
-    default JsonObject serialize()
-    {
-        return getHead().serialize();
-    }
 }

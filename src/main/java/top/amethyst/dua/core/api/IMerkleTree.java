@@ -48,7 +48,6 @@ public interface IMerkleTree <T extends IJsonSerializable> extends IJsonSerializ
      * 注意，调用本方法前需要先调用{@link #contains(T)}确定要验证的数据在默克尔树中
      * @param datum 要验证的数据
      * @return 用于验证数据的默克尔证据
-     *
      */
     @NotNull
     IMerkleProof<T> getMerkleProof(@NotNull T datum);
