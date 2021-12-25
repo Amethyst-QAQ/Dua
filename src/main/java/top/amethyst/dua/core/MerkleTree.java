@@ -19,6 +19,8 @@ import java.util.Collection;
 
 /**
  * 对{@link IMerkleTree}接口的实现
+ * <br>
+ * 此类是抽象类，但不含任何抽象方法。使用时可以直接构造匿名内部类。
  */
 public abstract class MerkleTree <T extends IJsonSerializable> implements IMerkleTree<T>
 {
