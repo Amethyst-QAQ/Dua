@@ -1,0 +1,3 @@
+[submodule "BrainFuchlamydomonos"]
+	path = BrainFuchlamydomonos
+	url = git@github.com:Chlamydomonos/BrainFuchlamydomonos.git

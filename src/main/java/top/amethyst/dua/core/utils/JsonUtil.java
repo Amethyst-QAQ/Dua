@@ -1,5 +1,6 @@
 package top.amethyst.dua.core.utils;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import top.amethyst.dua.api.core.IJsonSerializable;
@@ -12,6 +13,10 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class JsonUtil
 {
+    /**
+     * 整个项目使用的全局Gson对象
+     */
+    public static final Gson GSON = new Gson();
     /**
      * 从Json反序列化对象
      * @param json 对象序列化产生的Json
