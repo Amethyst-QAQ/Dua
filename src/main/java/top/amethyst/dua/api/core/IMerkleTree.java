@@ -1,4 +1,4 @@
-package top.amethyst.dua.core.api;
+package top.amethyst.dua.api.core;
 
 import org.jetbrains.annotations.NotNull;
 

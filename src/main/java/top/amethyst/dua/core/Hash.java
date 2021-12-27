@@ -2,11 +2,13 @@ package top.amethyst.dua.core;
 
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
-import top.amethyst.dua.core.api.IHash;
-import top.amethyst.dua.core.api.IJsonSerializable;
+import top.amethyst.dua.api.core.IHash;
+import top.amethyst.dua.api.core.IJsonSerializable;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * 对{@link IHash}接口的实现
@@ -56,7 +58,22 @@ public class Hash implements IHash
             if (i == null)
                 builder.append("{}");
             else
-                builder.append(i.serialize());
+            {
+                JsonObject json = i.serialize();
+                ArrayList<String> fields = i.getHashExcludedFields();
+                if(!(fields == null || fields.isEmpty()))
+                {
+                    HashSet<String> fieldsSet = new HashSet<>(fields);
+                    JsonObject temp = new JsonObject();
+                    for(String j : json.keySet())
+                    {
+                        if(!fieldsSet.contains(j))
+                            temp.add(j, json.get(j));
+                    }
+                    json = temp;
+                }
+                builder.append(json);
+            }
         }
         value = SHA256(builder.toString());
     }

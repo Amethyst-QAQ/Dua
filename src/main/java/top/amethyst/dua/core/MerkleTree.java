@@ -5,9 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import top.amethyst.dua.core.api.IHash;
-import top.amethyst.dua.core.api.IJsonSerializable;
-import top.amethyst.dua.core.api.IMerkleTree;
+import top.amethyst.dua.api.core.IHash;
+import top.amethyst.dua.api.core.IJsonSerializable;
+import top.amethyst.dua.api.core.IMerkleTree;
 import top.amethyst.dua.core.utils.AlgorithmUtil;
 import top.amethyst.dua.core.utils.JsonUtil;
 import top.amethyst.dua.core.utils.MathUtil;
@@ -140,7 +140,7 @@ public abstract class MerkleTree <T extends IJsonSerializable> implements IMerkl
     }
 
     /**
-     * 对{@link top.amethyst.dua.core.api.IMerkleTree.IMerkleProof}接口的实现
+     * 对{@link IMerkleTree.IMerkleProof}接口的实现
      */
     public class MerkleProof implements IMerkleTree.IMerkleProof<T>
     {

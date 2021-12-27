@@ -1,6 +1,5 @@
-package top.amethyst.dua.core.api;
+package top.amethyst.dua.api.core;
 
-import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

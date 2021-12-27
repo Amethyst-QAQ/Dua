@@ -4,10 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import top.amethyst.dua.core.api.IInput;
-import top.amethyst.dua.core.api.IOutput;
-import top.amethyst.dua.core.api.ITransaction;
-import top.amethyst.dua.core.utils.JsonUtil;
+import top.amethyst.dua.api.core.IInput;
+import top.amethyst.dua.api.core.IOutput;
+import top.amethyst.dua.api.core.ITransaction;
 
 import java.util.ArrayList;
 
@@ -22,7 +21,7 @@ public class Transaction implements ITransaction
     private ArrayList<IInput> inputs;
     private ArrayList<IOutput> outputs;
 
-    public Transaction( String version, int lockTime, ArrayList<IInput> inputs)
+    public Transaction(String version, int lockTime, ArrayList<IInput> inputs)
     {
         this.version = version;
         this.lockTime = lockTime;

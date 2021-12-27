@@ -3,7 +3,10 @@ package top.amethyst.dua.core;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import top.amethyst.dua.core.api.*;
+import top.amethyst.dua.api.core.IBlock;
+import top.amethyst.dua.api.core.IHash;
+import top.amethyst.dua.api.core.IMerkleTree;
+import top.amethyst.dua.api.core.ITransaction;
 import top.amethyst.dua.core.utils.JsonUtil;
 
 import java.util.ArrayList;
@@ -14,7 +17,7 @@ import java.util.ArrayList;
 public class Block implements IBlock
 {
     /**
-     * 对{@link top.amethyst.dua.core.api.IBlock.IHead}接口的实现
+     * 对{@link IBlock.IHead}接口的实现
      */
     public static class Head implements IBlock.IHead
     {
@@ -99,7 +102,7 @@ public class Block implements IBlock
     }
 
     /**
-     * 对{@link top.amethyst.dua.core.api.IBlock.IBody}接口的实现
+     * 对{@link IBlock.IBody}接口的实现
      */
     public static class Body implements IBlock.IBody
     {

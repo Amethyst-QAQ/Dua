@@ -2,8 +2,8 @@ package top.amethyst.dua.core;
 
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
-import top.amethyst.dua.core.api.IOutput;
-import top.amethyst.dua.core.api.IScript;
+import top.amethyst.dua.api.core.IOutput;
+import top.amethyst.dua.api.core.IScript;
 import top.amethyst.dua.core.utils.JsonUtil;
 
 public class Output implements IOutput
