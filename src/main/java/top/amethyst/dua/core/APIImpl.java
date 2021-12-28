@@ -1,6 +1,8 @@
 package top.amethyst.dua.core;
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.api.core.*;
 
 import java.lang.reflect.Method;
@@ -13,9 +15,15 @@ public class APIImpl implements DuaCoreAPI
     public static final APIImpl INSTANCE = new APIImpl();
 
     @Override
-    public IHash createHash(IJsonSerializable obj)
+    public IHash createHash(IJsonSerializable... obj)
     {
         return new Hash(obj);
+    }
+
+    @Override
+    public IHash createHash()
+    {
+        return new Hash();
     }
 
     @Override
@@ -25,7 +33,7 @@ public class APIImpl implements DuaCoreAPI
     }
 
     @Override
-    public IBlock createBlock(IBlock.IHead head, IBlock.IBody body)
+    public IBlock createBlock(@NotNull IBlock.IHead head, @Nullable IBlock.IBody body)
     {
         return new Block(head, body);
     }
