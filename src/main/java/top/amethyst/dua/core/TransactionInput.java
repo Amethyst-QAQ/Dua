@@ -2,26 +2,27 @@ package top.amethyst.dua.core;
 
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
-import top.amethyst.dua.api.core.IInput;
+import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IScript;
-import top.amethyst.dua.core.utils.JsonUtil;
+import top.amethyst.dua.api.core.ITransaction;
+import top.amethyst.dua.utils.JsonUtil;
 
-public class Input implements IInput
+public class TransactionInput implements ITransaction.IInput
 {
-    private final String txid;
+    private final IHash transactionId;
     private final int output;
     private final IScript inputScript;
 
-    public Input(JsonObject json)
+    public TransactionInput(JsonObject json)
     {
-        txid = json.get("txid").getAsString();
+        transactionId = JsonUtil.deserialize(json.getAsJsonObject("transactionId"), Hash.class);
         output = json.get("output").getAsInt();
-        inputScript = (IScript) JsonUtil.deserialize(json.getAsJsonObject("inputScript"), Script.class);
+        inputScript = JsonUtil.deserialize(json.getAsJsonObject("inputScript"), Script.class);
     }
 
-    public Input(String txid, int output, IScript inputScript)
+    public TransactionInput(IHash transactionId, int output, IScript inputScript)
     {
-        this.txid = txid;
+        this.transactionId = transactionId;
         this.output = output;
         this.inputScript = inputScript;
     }
@@ -30,16 +31,16 @@ public class Input implements IInput
     public @NotNull JsonObject serialize()
     {
         JsonObject json = new JsonObject();
-        json.addProperty("txid", txid);
+        json.add("transactionId", transactionId.serialize());
         json.addProperty("output", output);
         json.add("inputScript", inputScript.serialize());
         return json;
     }
 
     @Override
-    public String getTxid()
+    public IHash getTransactionId()
     {
-        return txid;
+        return transactionId;
     }
 
     @Override

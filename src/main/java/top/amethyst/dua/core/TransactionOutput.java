@@ -2,24 +2,24 @@ package top.amethyst.dua.core;
 
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
-import top.amethyst.dua.api.core.IOutput;
 import top.amethyst.dua.api.core.IScript;
-import top.amethyst.dua.core.utils.JsonUtil;
+import top.amethyst.dua.api.core.ITransaction;
+import top.amethyst.dua.utils.JsonUtil;
 
-public class Output implements IOutput
+public class TransactionOutput implements ITransaction.IOutput
 {
     private final int value;
     private final int index;
     private final IScript outputScript;
 
-    public Output(JsonObject json)
+    public TransactionOutput(JsonObject json)
     {
         value = json.get("value").getAsInt();
         index = json.get("index").getAsInt();
-        outputScript = (IScript) JsonUtil.deserialize(json.getAsJsonObject("outputScript"), Script.class);
+        outputScript = JsonUtil.deserialize(json.getAsJsonObject("outputScript"), Script.class);
     }
 
-    public Output(int value, int index, IScript outputScript)
+    public TransactionOutput(int value, int index, IScript outputScript)
     {
         this.value = value;
         this.index = index;

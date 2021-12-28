@@ -1,4 +1,4 @@
-package top.amethyst.dua.core.utils;
+package top.amethyst.dua.utils;
 
 /**
  * 一些自定义的数学工具

@@ -1,4 +1,4 @@
-package top.amethyst.dua.core.utils;
+package top.amethyst.dua.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

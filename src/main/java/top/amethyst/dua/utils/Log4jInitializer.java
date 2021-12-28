@@ -1,4 +1,4 @@
-package top.amethyst.dua.core.utils;
+package top.amethyst.dua.utils;
 
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;

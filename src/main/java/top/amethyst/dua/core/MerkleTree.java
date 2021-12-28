@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IJsonSerializable;
 import top.amethyst.dua.api.core.IMerkleTree;
-import top.amethyst.dua.core.utils.AlgorithmUtil;
-import top.amethyst.dua.core.utils.JsonUtil;
-import top.amethyst.dua.core.utils.MathUtil;
+import top.amethyst.dua.utils.AlgorithmUtil;
+import top.amethyst.dua.utils.JsonUtil;
+import top.amethyst.dua.utils.MathUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

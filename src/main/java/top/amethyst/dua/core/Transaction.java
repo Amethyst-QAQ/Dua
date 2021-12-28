@@ -6,10 +6,8 @@ import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.api.core.IHash;
-import top.amethyst.dua.api.core.IInput;
-import top.amethyst.dua.api.core.IOutput;
 import top.amethyst.dua.api.core.ITransaction;
-import top.amethyst.dua.core.utils.JsonUtil;
+import top.amethyst.dua.utils.JsonUtil;
 
 import java.util.ArrayList;
 
@@ -40,14 +38,14 @@ public class Transaction implements ITransaction
         inputs = new ArrayList<>();
         for(JsonElement i : inputArray)
         {
-            inputs.add(JsonUtil.deserialize(i.getAsJsonObject(), Input.class));
+            inputs.add(JsonUtil.deserialize(i.getAsJsonObject(), TransactionInput.class));
         }
 
         JsonArray outputArray = json.getAsJsonArray("outputs");
         outputs = new ArrayList<>();
         for(JsonElement i : outputArray)
         {
-            outputs.add(JsonUtil.deserialize(i.getAsJsonObject(), Output.class));
+            outputs.add(JsonUtil.deserialize(i.getAsJsonObject(), TransactionOutput.class));
         }
         time = json.get("time").getAsLong();
         blockTime = json.get("blockTime").getAsLong();
@@ -96,62 +94,73 @@ public class Transaction implements ITransaction
         return list;
     }
 
-
+    @Override
     public String getVersion()
     {
         return version;
     }
 
+    @Override
     public int getLockTime()
     {
         return lockTime;
     }
 
+    @Override
     public long getTime()
     {
         return time;
     }
 
+    @Override
     public long getBlockTime()
     {
         return blockTime;
     }
 
+    @Override
     public IHash getBlockHash()
     {
         return blockHash;
     }
 
+    @Override
     public int getConfirmations()
     {
         return confirmations;
     }
 
+    @Override
     public ArrayList<IInput> getInputs()
     {
         return inputs;
     }
 
+    @Override
     public ArrayList<IOutput> getOutputs()
     {
         return outputs;
     }
 
+    @Override
     public void setTime(long time)
     {
         this.time = time;
     }
 
+    @Override
     public void setBlockTime(long blockTime)
     {
         this.blockTime = blockTime;
     }
 
+    @Override
     public void setBlockHash(IHash blockHash)
     {
         this.blockHash = blockHash;
     }
 
+    @Override
     public void setConfirmations(int confirmations)
     {
         this.confirmations = confirmations;

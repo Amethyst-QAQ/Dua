@@ -1,4 +1,4 @@
-package top.amethyst.dua.core.utils;
+package top.amethyst.dua.utils;
 
 import java.util.Comparator;
 import java.util.List;

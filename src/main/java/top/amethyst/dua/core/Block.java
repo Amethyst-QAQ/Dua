@@ -7,7 +7,7 @@ import top.amethyst.dua.api.core.IBlock;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IMerkleTree;
 import top.amethyst.dua.api.core.ITransaction;
-import top.amethyst.dua.core.utils.JsonUtil;
+import top.amethyst.dua.utils.JsonUtil;
 
 import java.util.ArrayList;
 
@@ -23,12 +23,12 @@ public class Block implements IBlock
     {
         private static final String version = "Dua-1.0";
         private final int index;
-        private final Hash prevHash;
+        private final IHash prevHash;
         private final long timestamp;
         private final int nonce;
-        private final Hash rootHash;
+        private final IHash rootHash;
 
-        public Head(int index, Hash prevHash, long timestamp, int nonce, Hash rootHash)
+        public Head(int index, IHash prevHash, long timestamp, int nonce, IHash rootHash)
         {
             this.index = index;
             this.prevHash = prevHash;
@@ -106,9 +106,9 @@ public class Block implements IBlock
      */
     public static class Body implements IBlock.IBody
     {
-        private final MerkleTree<ITransaction> transactions;
+        private final IMerkleTree<ITransaction> transactions;
 
-        public Body(MerkleTree<ITransaction> transactions)
+        public Body(IMerkleTree<ITransaction> transactions)
         {
             this.transactions = transactions;
         }
