@@ -80,7 +80,40 @@ public abstract class ScriptInputWrapper <T> implements IScript.IInputWrapper<T>
                 JsonArray paramList = temp.getAsJsonArray("paramClassNames");
                 for(JsonElement i : paramList)
                 {
-                    paramClasses.add(Class.forName(i.getAsString()));
+                    String str = i.getAsString();
+                    switch (str)
+                    {
+                        case "int":
+                            paramClasses.add(Integer.TYPE);
+                            break;
+                        case "short":
+                            paramClasses.add(Short.TYPE);
+                            break;
+                        case "long":
+                            paramClasses.add(Long.TYPE);
+                            break;
+                        case "float":
+                            paramClasses.add(Float.TYPE);
+                            break;
+                        case "double":
+                            paramClasses.add(Double.TYPE);
+                            break;
+                        case "byte":
+                            paramClasses.add(Byte.TYPE);
+                            break;
+                        case "char":
+                            paramClasses.add(Character.TYPE);
+                            break;
+                        case "boolean":
+                            paramClasses.add(Boolean.TYPE);
+                            break;
+                        case "void":
+                            paramClasses.add(Void.TYPE);
+                            break;
+                        default:
+                            paramClasses.add(Class.forName(i.getAsString()));
+                            break;
+                    }
                 }
                 return new MethodInputWrapper(methodClass.getMethod(temp.get("methodName").getAsString(), paramClasses.toArray(new Class[0])));
             }

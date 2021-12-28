@@ -1,0 +1,37 @@
+{
+  "inputs": [
+    {
+      "className": "java.lang.reflect.Method",
+      "value": {
+        "className": "top.amethyst.dua.Main",
+        "methodName": "create",
+        "paramClassNames": []
+      }
+    },
+    {
+      "className": "java.lang.reflect.Method",
+      "value": {
+        "className": "java.lang.StringBuilder",
+        "methodName": "append",
+        "paramClassNames": ["int"]
+      }
+    },
+    {
+      "className": "java.lang.Integer",
+      "value": 123
+    },
+    {
+      "className": "java.lang.Integer",
+      "value": 456
+    },
+    {
+      "className": "java.lang.reflect.Method",
+      "value": {
+        "className": "java.lang.StringBuilder",
+        "methodName": "toString",
+        "paramClassNames": []
+      }
+    }
+  ],
+  "data": ">>,>+<+<<,/>++<+>>>,<<<\\+>>>,++<<<\\+,>-<+."
+}
