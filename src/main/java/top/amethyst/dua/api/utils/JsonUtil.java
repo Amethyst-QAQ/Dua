@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 /**
  * 一些自定义的Json序列化/反序列化工具
  */
+@SuppressWarnings("SameReturnValue")
 public interface JsonUtil
 {
     /**

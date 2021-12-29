@@ -3,6 +3,7 @@ package top.amethyst.dua.api.core;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import top.amethyst.dua.core.Hash;
 
 import java.util.ArrayList;
 
@@ -30,5 +31,10 @@ public interface IJsonSerializable
     default ArrayList<String> getHashExcludedFields()
     {
         return null;
+    }
+
+    default int HashCode()
+    {
+        return new Hash(this).HashCode();
     }
 }

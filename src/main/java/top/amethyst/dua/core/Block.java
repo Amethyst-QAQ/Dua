@@ -7,9 +7,10 @@ import top.amethyst.dua.api.core.IBlock;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IMerkleTree;
 import top.amethyst.dua.api.core.ITransaction;
-import top.amethyst.dua.utils.JsonUtil;
+import top.amethyst.dua.network.utils.JsonUtil;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * 对{@link IBlock}接口的实现
@@ -21,7 +22,7 @@ public class Block implements IBlock
      */
     public static class Head implements IBlock.IHead
     {
-        private static final String version = "Dua-1.0";
+        private final String version;
         private final int index;
         private final IHash prevHash;
         private final long timestamp;
@@ -35,6 +36,7 @@ public class Block implements IBlock
             this.timestamp = timestamp;
             this.nonce = nonce;
             this.rootHash = rootHash;
+            version = "Dua-1.0";
         }
 
         /**
@@ -47,6 +49,7 @@ public class Block implements IBlock
             timestamp = json.get("timestamp").getAsLong();
             nonce = json.get("nonce").getAsInt();
             rootHash = new Hash(json.get("rootHash").getAsJsonObject());
+            version = "Dua-1.0";
         }
 
         @NotNull
@@ -54,6 +57,12 @@ public class Block implements IBlock
         public IBlock.IHead next()
         {
             return new Head(index, prevHash, timestamp, nonce + 1, rootHash);
+        }
+
+        @Override
+        public String getVersion()
+        {
+            return version;
         }
 
         @Override
@@ -99,6 +108,17 @@ public class Block implements IBlock
             json.add("rootHash", rootHash.serialize());
             return json;
         }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (!(o instanceof Head)) return false;
+            Head head = (Head) o;
+            return index == head.index && timestamp == head.timestamp && nonce == head.nonce
+                   && Objects.equals(version, head.version) && Objects.equals(prevHash, head.prevHash)
+                   && Objects.equals(rootHash, head.rootHash);
+        }
     }
 
     /**
@@ -142,6 +162,15 @@ public class Block implements IBlock
             JsonObject json = new JsonObject();
             json.add("transactions", transactions.serialize());
             return json;
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (!(o instanceof Body)) return false;
+            Body body = (Body) o;
+            return Objects.equals(transactions, body.transactions);
         }
     }
 
@@ -212,5 +241,14 @@ public class Block implements IBlock
         if(!isBodyValid(body))
             throw new IllegalArgumentException("Cannot set an illegal body");
         this.body = body;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (!(o instanceof Block)) return false;
+        Block block = (Block) o;
+        return Objects.equals(head, block.head);
     }
 }

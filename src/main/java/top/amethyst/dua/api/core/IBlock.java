@@ -25,6 +25,11 @@ public interface IBlock extends IJsonSerializable
         IBlock.IHead next();
 
         /**
+         * 获取Dua协议版本
+         */
+        String getVersion();
+
+        /**
          * 获取序号
          */
         int getIndex();

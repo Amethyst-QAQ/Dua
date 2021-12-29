@@ -7,9 +7,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.ITransaction;
-import top.amethyst.dua.utils.JsonUtil;
+import top.amethyst.dua.network.utils.JsonUtil;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Transaction implements ITransaction
 {
@@ -18,7 +19,6 @@ public class Transaction implements ITransaction
     private long time;
     private long blockTime;
     private IHash blockHash;
-    private int confirmations;
     private final ArrayList<IInput> inputs;
     private final ArrayList<IOutput> outputs;
 
@@ -51,7 +51,6 @@ public class Transaction implements ITransaction
         blockTime = json.get("blockTime").getAsLong();
         if(json.has("blockHash"))
             blockHash = JsonUtil.deserialize(json.getAsJsonObject("blockHash"), Hash.class);
-        confirmations = json.get("confirmations").getAsInt();
     }
 
     @Override
@@ -65,19 +64,16 @@ public class Transaction implements ITransaction
         json.addProperty("lockTime", lockTime);
         json.addProperty("time", time);
         json.addProperty("blockTime", blockTime);
-        json.addProperty("confirmations", confirmations);
 
         JsonArray inputArray = new JsonArray();
         for (IInput i : inputs)
             inputArray.add(i.serialize());
         json.add("inputs", inputArray);
 
-
         JsonArray outputArray = new JsonArray();
         for (IOutput i : outputs)
             outputArray.add(i.serialize());
         json.add("outputs", outputArray);
-
 
         return json;
     }
@@ -125,12 +121,6 @@ public class Transaction implements ITransaction
     }
 
     @Override
-    public int getConfirmations()
-    {
-        return confirmations;
-    }
-
-    @Override
     public ArrayList<IInput> getInputs()
     {
         return inputs;
@@ -161,8 +151,11 @@ public class Transaction implements ITransaction
     }
 
     @Override
-    public void setConfirmations(int confirmations)
+    public boolean equals(Object o)
     {
-        this.confirmations = confirmations;
+        if (this == o) return true;
+        if (!(o instanceof Transaction)) return false;
+        Transaction that = (Transaction) o;
+        return lockTime == that.lockTime && Objects.equals(version, that.version) && Objects.equals(inputs, that.inputs) && Objects.equals(outputs, that.outputs);
     }
 }

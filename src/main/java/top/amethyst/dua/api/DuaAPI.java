@@ -6,6 +6,7 @@ import top.amethyst.dua.api.utils.DuaUtilsAPI;
 /**
  * Dua API主接口，用于调用一切Dua API
  */
+@SuppressWarnings("SameReturnValue")
 public abstract class DuaAPI
 {
     private static final DuaAPI instance;
@@ -29,6 +30,11 @@ public abstract class DuaAPI
     {
         return instance;
     }
+
+    /**
+     * 获取当前API使用的Dua协议版本
+     */
+    public abstract String getDuaVersion();
 
     /**
      * 获取Dua核心API接口

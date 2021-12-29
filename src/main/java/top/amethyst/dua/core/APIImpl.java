@@ -105,6 +105,12 @@ public class APIImpl implements DuaCoreAPI
     }
 
     @Override
+    public IScript.IInputWrapper<String> createStringInputWrapper(String value)
+    {
+        return new ScriptInputWrapper.StringInputWrapper(value);
+    }
+
+    @Override
     public IScript.IInputWrapper<?> deserializeInputWrapper(JsonObject json)
     {
         return ScriptInputWrapper.deserialize(json);

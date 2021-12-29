@@ -106,6 +106,12 @@ public interface DuaCoreAPI
     IScript.IInputWrapper<Method> createMethodInputWrapper(Method value);
 
     /**
+     * 从指定数据创建交易脚本输入
+     * @see IScript.IInputWrapper
+     */
+    IScript.IInputWrapper<String> createStringInputWrapper(String value);
+
+    /**
      * 从Json反序列化交易脚本输入
      * @see IScript.IInputWrapper
      */

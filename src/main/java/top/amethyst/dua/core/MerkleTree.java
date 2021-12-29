@@ -8,14 +8,13 @@ import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IJsonSerializable;
 import top.amethyst.dua.api.core.IMerkleTree;
-import top.amethyst.dua.utils.AlgorithmUtil;
-import top.amethyst.dua.utils.JsonUtil;
-import top.amethyst.dua.utils.MathUtil;
+import top.amethyst.dua.network.utils.AlgorithmUtil;
+import top.amethyst.dua.network.utils.JsonUtil;
+import top.amethyst.dua.network.utils.MathUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * 对{@link IMerkleTree}接口的实现
@@ -136,6 +135,15 @@ public abstract class MerkleTree <T extends IJsonSerializable> implements IMerkl
         public int compareTo(@NotNull MerkleTree<T>.LeaveNode o)
         {
             return datumHash.compareTo(o.datumHash);
+        }
+
+        @SuppressWarnings({"unchecked", "EqualsWhichDoesntCheckParameterClass"})
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            LeaveNode leaveNode = (LeaveNode) o;
+            return Objects.equals(datum, leaveNode.datum) && Objects.equals(datumHash, leaveNode.datumHash);
         }
     }
 
@@ -362,5 +370,45 @@ public abstract class MerkleTree <T extends IJsonSerializable> implements IMerkl
         searchFrom(index, root, height - 1, 0, nodes, isLeft);
 
         return new MerkleProof(datum, isLeft, nodes);
+    }
+
+    @Override
+    public T get(int index)
+    {
+        return leaves.get(index).datum;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (!(o instanceof MerkleTree)) return false;
+        MerkleTree<?> that = (MerkleTree<?>) o;
+        return Objects.equals(classOfT, that.classOfT) && Objects.equals(leaves, that.leaves);
+    }
+
+    @NotNull
+    @Override
+    public Iterator<T> iterator()
+    {
+        return new Iterator<T>()
+        {
+            private int index = 0;
+            @Override
+            public boolean hasNext()
+            {
+                return index < leaves.size();
+            }
+
+            @Override
+            public T next()
+            {
+                if(!hasNext())
+                    throw new NoSuchElementException("What happened??");
+                T temp = leaves.get(index).datum;
+                index++;
+                return temp;
+            }
+        };
     }
 }

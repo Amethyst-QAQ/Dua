@@ -5,7 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IScript;
 import top.amethyst.dua.api.core.ITransaction;
-import top.amethyst.dua.utils.JsonUtil;
+import top.amethyst.dua.network.utils.JsonUtil;
+
+import java.util.Objects;
 
 public class TransactionInput implements ITransaction.IInput
 {
@@ -53,5 +55,14 @@ public class TransactionInput implements ITransaction.IInput
     public IScript getInputScript()
     {
         return inputScript;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (!(o instanceof TransactionInput)) return false;
+        TransactionInput that = (TransactionInput) o;
+        return output == that.output && Objects.equals(transactionId, that.transactionId) && Objects.equals(inputScript, that.inputScript);
     }
 }

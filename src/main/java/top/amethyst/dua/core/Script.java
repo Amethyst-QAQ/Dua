@@ -7,10 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import top.amethyst.dua.api.core.IScript;
 import xyz.chlamydomonos.brainfuc.BFChScript;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class Script extends BFChScript implements IScript
 {
@@ -32,7 +29,7 @@ public class Script extends BFChScript implements IScript
     }
 
     @Override
-    public @NotNull Queue<?> enqueueInputs()
+    public @NotNull Queue<Object> enqueueInputs()
     {
         Queue<Object> out = new LinkedList<>();
         for(IInputWrapper<?> i : inputs)
@@ -57,5 +54,15 @@ public class Script extends BFChScript implements IScript
         json.add("inputs", inputArray);
 
         return json;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (!(o instanceof Script)) return false;
+        if (!super.equals(o)) return false;
+        Script script = (Script) o;
+        return Objects.equals(inputs, script.inputs);
     }
 }

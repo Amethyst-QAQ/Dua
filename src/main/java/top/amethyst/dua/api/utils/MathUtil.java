@@ -12,4 +12,6 @@ public interface MathUtil
      * @return 幂
      */
     int pow(int a, int b);
+
+    long pow(long a, long b);
 }

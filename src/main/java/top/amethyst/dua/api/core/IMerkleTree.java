@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
  * 默克尔树，用于存储交易信息
  * @param <T> 默克尔树存储的数据类型
  */
-public interface IMerkleTree <T extends IJsonSerializable> extends IJsonSerializable
+public interface IMerkleTree <T extends IJsonSerializable> extends IJsonSerializable, Iterable<T>
 {
     /**
      * 默克尔证据
@@ -51,4 +51,10 @@ public interface IMerkleTree <T extends IJsonSerializable> extends IJsonSerializ
      */
     @NotNull
     IMerkleProof<T> getMerkleProof(@NotNull T datum);
+
+    /**
+     * 按序号获取默克尔树中的数据
+     * @param index 数据的序号
+     */
+    T get(int index);
 }

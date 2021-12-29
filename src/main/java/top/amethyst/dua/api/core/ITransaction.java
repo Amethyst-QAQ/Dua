@@ -13,7 +13,7 @@ public interface ITransaction extends IJsonSerializable
 
     interface IOutput extends IJsonSerializable
     {
-        int getValue();
+        long getValue();
         int getIndex();
         IScript getOutputScript();
     }
@@ -28,8 +28,6 @@ public interface ITransaction extends IJsonSerializable
 
     IHash getBlockHash();
 
-    int getConfirmations();
-
     ArrayList<IInput> getInputs();
 
     ArrayList<IOutput> getOutputs();
@@ -39,6 +37,4 @@ public interface ITransaction extends IJsonSerializable
     void setBlockTime(long blockTime);
 
     void setBlockHash(IHash blockHash);
-
-    void setConfirmations(int confirmations);
 }
