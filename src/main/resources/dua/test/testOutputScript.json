@@ -1,0 +1,13 @@
+{
+  "inputs": [
+    {
+      "className": "java.lang.reflect.Method",
+      "value": {
+        "className": "java.util.Objects",
+        "methodName": "equals",
+        "paramClassNames": ["java.lang.Object", "java.lang.Object"]
+      }
+    }
+  ],
+  "data": ",>+++<+."
+}

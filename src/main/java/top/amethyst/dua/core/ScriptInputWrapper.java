@@ -157,7 +157,7 @@ public abstract class ScriptInputWrapper <T> implements IScript.IInputWrapper<T>
         }
         catch (ClassNotFoundException | NoSuchMethodException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return null;
     }

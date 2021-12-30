@@ -60,6 +60,7 @@ public class Hash implements IHash
             else
             {
                 JsonObject json = i.serialize();
+
                 ArrayList<String> fields = i.getHashExcludedFields();
                 if(!(fields == null || fields.isEmpty()))
                 {

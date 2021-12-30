@@ -1,4 +1,4 @@
-package top.amethyst.dua.network.utils;
+package top.amethyst.dua.utils;
 
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -24,7 +24,7 @@ public class Log4jInitializer
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
     }
 }

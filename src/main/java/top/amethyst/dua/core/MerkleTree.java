@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IJsonSerializable;
 import top.amethyst.dua.api.core.IMerkleTree;
-import top.amethyst.dua.network.utils.AlgorithmUtil;
-import top.amethyst.dua.network.utils.JsonUtil;
-import top.amethyst.dua.network.utils.MathUtil;
+import top.amethyst.dua.utils.AlgorithmUtil;
+import top.amethyst.dua.utils.JsonUtil;
+import top.amethyst.dua.utils.MathUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -306,9 +306,18 @@ public abstract class MerkleTree <T extends IJsonSerializable> implements IMerkl
         leaves.sort(LeaveNode::compareTo);
 
         ArrayList<? extends Node> nodes = leaves;
-        while (nodes.size() > 1)
-            nodes = createNodes(nodes);
-        root = (ParentNode) nodes.get(0);
+
+        if(nodes.size() == 1)
+        {
+            root = new ParentNode(nodes.get(0));
+        }
+
+        else
+        {
+            while (nodes.size() > 1)
+                nodes = createNodes(nodes);
+            root = (ParentNode) nodes.get(0);
+        }
     }
 
     /**
@@ -327,9 +336,15 @@ public abstract class MerkleTree <T extends IJsonSerializable> implements IMerkl
         }
 
         ArrayList<? extends Node> nodes = leaves;
-        while (nodes.size() > 1)
-            nodes = createNodes(nodes);
-        root = (ParentNode) nodes.get(0);
+
+        if(nodes.size() == 1)
+            root = new ParentNode(nodes.get(0));
+        else
+        {
+            while (nodes.size() > 1)
+                nodes = createNodes(nodes);
+            root = (ParentNode) nodes.get(0);
+        }
     }
 
     @Override

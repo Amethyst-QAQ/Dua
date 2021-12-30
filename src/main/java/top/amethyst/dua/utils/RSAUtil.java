@@ -1,4 +1,4 @@
-package top.amethyst.dua.network.utils;
+package top.amethyst.dua.utils;
 
 import com.google.gson.JsonObject;
 import javafx.util.Pair;
@@ -34,7 +34,7 @@ public class RSAUtil
         }
         catch (NoSuchAlgorithmException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
     }
 
@@ -67,7 +67,7 @@ public class RSAUtil
             return  (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(str)));
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return null;
     }
@@ -82,7 +82,7 @@ public class RSAUtil
             return  (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new X509EncodedKeySpec(Base64.getDecoder().decode(str)));
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return null;
     }
@@ -101,7 +101,7 @@ public class RSAUtil
             return new Pair<>(publicKey, privateKey);
         } catch (InvalidKeyException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return new Pair<>("", "");
     }
@@ -119,7 +119,7 @@ public class RSAUtil
             result = Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes(StandardCharsets.UTF_8)));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return result;
     }
@@ -144,7 +144,7 @@ public class RSAUtil
             return new String(cipher.doFinal(Base64.getDecoder().decode(str)));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return "";
     }
@@ -173,7 +173,7 @@ public class RSAUtil
             result = Base64.getEncoder().encodeToString(signature.sign());
         } catch (NoSuchAlgorithmException | SignatureException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return result;
     }
@@ -199,7 +199,7 @@ public class RSAUtil
             return signature.verify(Base64.getDecoder().decode(sign));
         } catch (NoSuchAlgorithmException | SignatureException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return false;
     }

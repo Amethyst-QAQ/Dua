@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IScript;
 import top.amethyst.dua.api.core.ITransaction;
-import top.amethyst.dua.network.utils.JsonUtil;
+import top.amethyst.dua.utils.JsonUtil;
 
 import java.util.Objects;
 

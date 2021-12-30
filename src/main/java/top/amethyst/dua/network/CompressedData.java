@@ -3,7 +3,7 @@ package top.amethyst.dua.network;
 import com.google.gson.JsonObject;
 import top.amethyst.dua.api.core.IJsonSerializable;
 import top.amethyst.dua.api.network.ICompressedData;
-import top.amethyst.dua.network.utils.JsonUtil;
+import top.amethyst.dua.utils.JsonUtil;
 
 import java.io.*;
 import java.lang.reflect.ParameterizedType;
@@ -35,6 +35,37 @@ public abstract class CompressedData <T extends IJsonSerializable> implements IC
                 out = (Class<T>) types[0];
         }
         return out;
+    }
+
+    private static byte[] toByteArray(String filename) throws IOException{
+
+        File f = new File(filename);
+        if(!f.exists()){
+            throw new FileNotFoundException(filename);
+        }
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream((int)f.length());
+        BufferedInputStream in = null;
+        try{
+            in = new BufferedInputStream(new FileInputStream(f));
+            int buf_size = 1 << 26;
+            byte[] buffer = new byte[buf_size];
+            int len = 0;
+            while(-1 != (len = in.read(buffer,0,buf_size))){
+                bos.write(buffer,0,len);
+            }
+            return bos.toByteArray();
+        }catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }finally{
+            try{
+                in.close();
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+            bos.close();
+        }
     }
 
     public CompressedData()
@@ -85,7 +116,7 @@ public abstract class CompressedData <T extends IJsonSerializable> implements IC
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         finally
         {
@@ -97,13 +128,13 @@ public abstract class CompressedData <T extends IJsonSerializable> implements IC
                 }
                 catch (IOException e)
                 {
-                    e.printStackTrace();
+                    e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
                 }
             }
         }
 
         byte[] out = outputStream.toByteArray();
-        if(out.length > (1 << 6))
+        if(out.length > (1 << 20))
             throw new RuntimeException("Data bigger than 1MB, will cause error decompressing");
 
         try
@@ -112,7 +143,7 @@ public abstract class CompressedData <T extends IJsonSerializable> implements IC
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         return out;
     }
@@ -120,7 +151,7 @@ public abstract class CompressedData <T extends IJsonSerializable> implements IC
     @Override
     public void decompress(byte[] compressedData)
     {
-        if(compressedData.length > 1 >> 6)
+        if(compressedData.length > (1 << 20))
             throw new RuntimeException("Compressed data bigger than 1MB, cannot decompress");
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -130,18 +161,20 @@ public abstract class CompressedData <T extends IJsonSerializable> implements IC
         try
         {
             gzip = new GZIPInputStream(inputStream);
-            byte[] buffer = new byte[1 << 6];
+            byte[] buffer = new byte[1 << 20];
             int offset;
             while ((offset = gzip.read(buffer)) != -1)
             {
                 outputStream.write(buffer, 0, offset);
             }
 
-            data = JsonUtil.deserialize(JsonUtil.GSON.fromJson(outputStream.toString(), JsonObject.class), classOfT);
+            String jsonString = outputStream.toString();
+
+            data = JsonUtil.deserialize(JsonUtil.GSON.fromJson(jsonString, JsonObject.class), classOfT);
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
         finally
         {
@@ -154,7 +187,7 @@ public abstract class CompressedData <T extends IJsonSerializable> implements IC
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
             }
         }
     }
@@ -169,61 +202,34 @@ public abstract class CompressedData <T extends IJsonSerializable> implements IC
             File file = new File(fileName);
             if(!file.exists())
             {
+                if(!file.getParentFile().exists())
+                    if(!file.getParentFile().mkdirs())
+                        throw new RuntimeException("What Happened??");
+
                 if(!file.createNewFile())
                     throw new RuntimeException("What Happened??");
             }
 
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file));
-            byte[] bytes = data.serialize().toString().getBytes(StandardCharsets.UTF_8);
-            bufferedOutputStream.write(bytes, 0, bytes.length);
+            bufferedOutputStream.write(compressedData, 0, compressedData.length);
             bufferedOutputStream.close();
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
     }
 
     @Override
     public void loadFromFile(String fileName)
     {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        BufferedInputStream inputStream = null;
-        GZIPInputStream gzip = null;
         try
         {
-            inputStream = new BufferedInputStream(new  FileInputStream(fileName));
-            if(inputStream.available() > 1 >> 6)
-                throw new RuntimeException("File bigger than 1MB, cannot load");
-            gzip = new GZIPInputStream(inputStream);
-
-            byte[] buffer = new byte[1 << 6];
-            int offset;
-            while ((offset = gzip.read(buffer)) != -1)
-            {
-                outputStream.write(buffer, 0, offset);
-            }
-
-            data = JsonUtil.deserialize(JsonUtil.GSON.fromJson(outputStream.toString(), JsonObject.class), classOfT);
+            decompress(toByteArray(fileName));
         }
         catch (IOException e)
         {
-            e.printStackTrace();
-        }
-        finally
-        {
-            try
-            {
-                outputStream.close();
-                if(inputStream != null)
-                    inputStream.close();
-                if (gzip != null)
-                    gzip.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            e.printStackTrace();org.apache.logging.log4j.LogManager.getLogger().error(e.getMessage(), e);
         }
     }
 }

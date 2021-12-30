@@ -24,6 +24,6 @@ public class APIImpl extends DuaAPI
     @Override
     public DuaUtilsAPI getUtilsAPI()
     {
-        return top.amethyst.dua.network.utils.APIImpl.INSTANCE;
+        return top.amethyst.dua.utils.APIImpl.INSTANCE;
     }
 }

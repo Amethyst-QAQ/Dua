@@ -7,7 +7,7 @@ import top.amethyst.dua.api.core.IBlock;
 import top.amethyst.dua.api.core.IHash;
 import top.amethyst.dua.api.core.IMerkleTree;
 import top.amethyst.dua.api.core.ITransaction;
-import top.amethyst.dua.network.utils.JsonUtil;
+import top.amethyst.dua.utils.JsonUtil;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -126,6 +126,14 @@ public class Block implements IBlock
      */
     public static class Body implements IBlock.IBody
     {
+        public static class Temp extends MerkleTree<Transaction>
+        {
+            public Temp(JsonObject json)
+            {
+                super(json);
+            }
+        }
+
         private final IMerkleTree<ITransaction> transactions;
 
         public Body(IMerkleTree<ITransaction> transactions)
@@ -138,15 +146,13 @@ public class Block implements IBlock
          */
         public Body(JsonObject json)
         {
-            class Temp extends MerkleTree<ITransaction>
-            {
-                public Temp(JsonObject json)
-                {
-                    super(json);
-                }
-            }
+            Temp temp = JsonUtil.deserialize(json.getAsJsonObject("transactions"), Temp.class);
 
-            transactions = JsonUtil.deserialize(json.getAsJsonObject("transactions"), Temp.class);
+            ArrayList<ITransaction> tempList = new ArrayList<>();
+            for(ITransaction i : temp)
+                tempList.add(i);
+
+            transactions = new MerkleTree<ITransaction>(tempList) {};
         }
 
         @NotNull
